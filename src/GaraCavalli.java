@@ -8,6 +8,11 @@ public class GaraCavalli {
     /** Nome del cavallo vincitore della corsa. */
     static String first;
 
+    /**
+     * Metodo principale che gestisce l'interazione con l'utente e le varie opzioni del menu.
+     *
+     * @param args argomenti della riga di comando (non utilizzati)
+     */
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         boolean x = true;
@@ -16,27 +21,29 @@ public class GaraCavalli {
 
         while (x) {
             System.out.println("__________________________________________________________________________");
-            System.out.println("1.Inserisci un cavallo\n2.Inserisci sleepTime\n3.Inizia la gara\n4.Azzoppa un cavallo\n5.Esci");
-            System.out.println("Inserisci un opzione:");
+            System.out.println("1.Insert horse \n2.Insert sleepTime \n3.Start the race\n4.Azzoppa un cavallo\n5.Exit");
+            System.out.println("Enter the option:");
             condition = scanner.nextInt();
             scanner.nextLine();
 
             switch (condition) {
                 case 1:
-                    System.out.println("Inserisci il nome del cavallo:");
+                    // Inserisce un nuovo cavallo nella lista
+                    System.out.println("Enter the horse name:");
                     String horseName = scanner.nextLine();
                     horses.add(new Cavallo(horseName));
                     break;
 
                 case 2:
+                    // Imposta il tempo di corsa per un cavallo esistente
                     int i = 1;
-                    System.out.println("Lista cavalli:");
+                    System.out.println("Horse List:");
                     for (Cavallo c : horses) {
                         System.out.println(i++ + " " + c.getHorseName());
                     }
-                    System.out.println("Inserisci nome cavallo:");
+                    System.out.println("Insert name of horse:");
                     String name = scanner.nextLine();
-                    System.out.println("Inserisci sleepTime:");
+                    System.out.println("Insert the sleep time:");
                     int sleepTime = scanner.nextInt();
                     scanner.nextLine();
 
@@ -49,26 +56,44 @@ public class GaraCavalli {
                         }
                     }
                     if (!found) {
-                        System.out.println("Cavallo non trovato.");
+                        System.out.println("Horse not found.");
                     }
                     break;
 
                 case 3:
-                    for (Cavallo c : horses) {
-                        c.start();
+                    // Avvia la corsa
+                    if (horses.isEmpty()) {
+                        System.out.println("No horses in the race!");
+                        break;
                     }
 
+                    Main.first = null;
+
+                    ArrayList<Cavallo> race = new ArrayList<>();
                     for (Cavallo c : horses) {
+                        race.add(new Cavallo(c.getHorseName()));  // nuova istanza per ogni cavallo
+                        race.get(race.size() - 1).setSleepTime(c.getSleepTime());
+                    }
+
+                    for (Cavallo c : race) {
+                        c.start();
+                    }
+                    for (Cavallo c : race) {
                         try {
                             c.join();
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
                     }
-                    System.out.println("Il vincitore è: " + first);
+
+                    System.out.println("The winner is: " + first);
+
+                    // Dopo la corsa, chiede dove salvare il risultato
+                    salvaRisultatoSuFile("The winner is: " + first);
                     break;
 
                 case 4:
+                    // Azzoppa (interrompe) un cavallo scelto casualmente
                     if (!horses.isEmpty()) {
                         int rand = (int) (Math.random() * horses.size());
                         horses.get(rand).setInterrupt();
@@ -76,13 +101,13 @@ public class GaraCavalli {
                     }
                     break;
 
-
                 case 5:
+                    // Esce dal programma
                     x = false;
                     break;
 
                 default:
-                    System.out.println("Funzione non valida!");
+                    System.out.println("Invalid option!");
                     break;
             }
         }
@@ -90,32 +115,15 @@ public class GaraCavalli {
         scanner.close();
     }
 
-    /**
-     * Imposta il nome del cavallo vincitore.
-     * Metodo sincronizzato per evitare accessi concorrenti da più thread.
-     *
-     * @param t nome del cavallo vincitore
-     */
     public static synchronized void setFirst(String t) {
         first = t;
     }
 
-    /**
-     * Restituisce il nome del cavallo vincitore.
-     * Metodo sincronizzato per garantire la consistenza dei dati.
-     *
-     * @return nome del cavallo vincitore
-     */
     public static synchronized String getFirst() {
         return first;
     }
 
-    /**
-     * Mostra una finestra di dialogo per scegliere dove salvare il risultato della corsa
-     * e scrive il testo specificato nel file selezionato.
-     *
-     * @param testo testo da salvare nel file
-     */
+
     public static void salvaRisultatoSuFile(String testo) {
         try {
             JFileChooser fc = new JFileChooser();
